@@ -1,13 +1,21 @@
 <script lang="ts">
 	import ItemForm from "./ItemForm.svelte";
-	let { product, editItem} = $props();
+	import { type Product } from "$lib/types/product";
+	let { product = $bindable(), onDelete } = $props();
 	let expand = $state(false);
 	let edit = $state(false);
 
-	function editItemAndReset(){
-		editItem(product);
-		edit = false;
+	function editItem(editedProduct: Product){
+		product.id = editedProduct.id;
+		product.name = editedProduct.name;
+		product.price = editedProduct.price;
+		product.quantity = editedProduct.quantity;
 	}
+
+	function deleteProduct(){
+		onDelete(product.id);
+	}
+
 </script>
 
 <div class="bg-white p-3 rounded-xl shadow-sm">
@@ -29,7 +37,7 @@
 
 	{#if expand}
 		{#if edit}
-			<ItemForm {product} itemFunction={editItemAndReset} />
+			<ItemForm {product} itemFunction={editItem} onAccept={() => edit=!edit} />
 		{:else}
 			<div class="flex flex-row grow gap-2 justify-center">
 				<button 
@@ -40,6 +48,7 @@
 	 <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#000000" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="16 3 21 8 8 21 3 21 3 16 16 3"></polygon></svg>
 				</button>
 				<button 
+			onclick={deleteProduct}
 				aria-label="Delete"
 			class="border-3 border-black text-white bg-red-400 rounded-xl hover:bg-red-500 active:bg-red-600 focus:outline-none text-xl p-3 shadow-md"
 	 >
