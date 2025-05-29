@@ -4,8 +4,12 @@
 	"version": "0.0.1",
 	"type": "module",
 	"scripts": {
-		"dev": "vite dev",
-		"build": "vite build",
+		"dev": "npm run copy:sql:wasm && vite dev",
+		"build": "npm run copy:sql:wasm && vite build",
+		"build:web": "npm run copy:sql:wasm && vite build",
+		"build:native": "npm run remove:sql:wasm && vite build",
+		"copy:sql:wasm": "npx copyfiles -u 3 node_modules/sql.js/dist/sql-wasm.wasm static/assets",
+		"remove:sql:wasm": "rimraf static/assets/sql-wasm.wasm",
 		"preview": "vite preview",
 		"prepare": "svelte-kit sync || echo ''",
 		"check": "svelte-kit sync && svelte-check --tsconfig ./tsconfig.json",
@@ -13,7 +17,12 @@
 		"format": "prettier --write .",
 		"lint": "prettier --check . && eslint .",
 		"test:unit": "vitest",
-		"test": "npm run test:unit -- --run"
+		"test": "npm run test:unit -- --run",
+	  "ios:start": "npm run remove:sql:wasm && npm run build:native && npx cap sync && npx cap copy && npx cap open ios",
+	 	"android:start": "npm run remove:sql:wasm && npm run build:native && npx cap sync && npx cap copy && npx cap open android",
+   	"electron:install": "cd electron && npm install && cd ..",
+   	"electron:prepare": "npm run remove:sql:wasm && npm run build && npx cap sync @capacitor-community/electron && npx cap copy @capacitor-community/electron",
+   	"electron:start": "npm run electron:prepare && cd electron && npm run electron:start"
 	},
 	"devDependencies": {
 		"@eslint/compat": "^1.2.5",
@@ -41,6 +50,7 @@
 		"vitest": "^3.0.0"
 	},
 	"dependencies": {
+		"@capacitor-community/sqlite": "^7.0.0",
 		"@capacitor/android": "^7.2.0",
 		"@capacitor/cli": "^7.2.0",
 		"@capacitor/core": "^7.2.0",

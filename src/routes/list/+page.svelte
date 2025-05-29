@@ -1,9 +1,13 @@
 <script lang="ts">
+	//List
 	import { Money } from '$lib/types/money';
-	import ItemForm from '$lib/components/ItemForm.svelte';
-	import ListItem from '$lib/components/ListItem.svelte';
 	import { type Product } from '$lib/types/product';
+	import ItemForm from '$lib/components/List/ItemForm.svelte';
+	import ListItem from '$lib/components/List/ListItem.svelte';
 
+	let { listName = undefined } = $props();
+
+	let expand = $state(false);
 	let products = $state<Product[]>([
 		{id: 0, name: "Leche", price: new Money(10.50), quantity: 3},
 		{id: 1, name: "Chele", price: new Money(20, 50), quantity: 1},
@@ -16,7 +20,6 @@
 		}
 		return sum;
 	})
-	let expand = $state(false);
 
 	function addNewItem(product: Product){
 		products.push({
@@ -30,8 +33,6 @@
 	function deleteItem(pId: number){
 		products = products.filter(p => p.id != pId);
 	}
-
-	$inspect(products);
 
 </script>
 

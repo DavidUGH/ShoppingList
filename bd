@@ -1,0 +1,2 @@
+#!/bin/bash
+npm run build ; npx cap run android; adb logcat | grep Capacitor
