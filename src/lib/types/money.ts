@@ -1,82 +1,48 @@
-export class Money{
-	public unit: number;
-	public cent: number;
+export class Money {
+	constructor(
+		public unit: number = 0,
+		public cent: number = 0
+	) {}
 
-	constructor();
-	constructor(arg1: number);
-	constructor(arg1: number, arg2: number);
-	constructor(arg1?: number, arg2?: number){
-		if(!arg1 && !arg2){
-			this.unit = 0;
-			this.cent = 0;
-		}else if(arg1 && !arg2){
-			this.unit = Math.floor(arg1);
-			this.cent = (arg1 - Math.floor(arg1)) * 100;
-		}else if(arg1 && arg2){
-			this.unit = arg1;
-			this.cent = arg2;
-		}else{
-			throw new Error("arg1 was undefined, do not do that");
-		}
-	}
-	add(other: Money): Money{
-		let newCent = this.cent + other.cent;
-		let newUnit = this.unit + other.unit;
-		if(newCent > 99){
-			newUnit++;
-			newCent=newCent-100;
-		}else if(newCent < 0){
-			newUnit--;
-			newCent=100+newCent;
-		}
-		return new Money(newUnit, newCent);
+	static fromNumber(value: number): Money {
+		const unit = Math.floor(value);
+		const cent = Math.round((value - unit) * 100);
+		return new Money(unit, cent);
 	}
 
-	sub(other: Money): Money{
-		let newCent = this.cent - other.cent;
-		let newUnit = this.unit - other.unit;
-		if(newCent < 0){
-			newUnit--;
-			newCent=newCent+100;
-		}
-		if(newCent > 99){
-			newUnit--;
-			newCent=newCent-100;
-		}
-		return new Money(newUnit, newCent)
+	static normalized(unit: number, cent: number): Money {
+		const totalCents = unit * 100 + cent;
+		const normUnit = Math.floor(totalCents / 100);
+		const normCent = totalCents % 100;
+		return new Money(normUnit, normCent);
 	}
 
-	mult(other: number): Money{
-		//10.50 * 3
-		//10.50 + 10.50 = 21.00
-		//21.00 + 10.50 = 31.50
-		let newCent = this.cent * other;
-		let newUnit = this.unit * other;
-		if(newCent > 99){
-			newUnit++;
-			newCent=newCent-100;
-		}else if(newCent < 0){
-			newUnit--;
-			newCent=100+newCent;
-		}
-		return new Money(newUnit, newCent);
+	add(other: Money): Money {
+		return Money.normalized(this.unit + other.unit, this.cent + other.cent);
 	}
 
-	div(other: number): Money{
-		let newUnit = this.unit / other;
-		let newCent = this.cent / other;
-		if(newCent > 99){
-			newUnit++;
-			newCent=newCent-100;
-		}else if(newCent < 0){
-			newUnit--;
-			newCent=100+newCent;
-		}
-		return new Money(newUnit, newCent);
+	sub(other: Money): Money {
+		return Money.normalized(this.unit - other.unit, this.cent - other.cent);
 	}
 
-	toString(): string{
-		return this.unit + "." + (this.cent<10? "0" + this.cent : this.cent);
+	mult(factor: number): Money {
+		const total = (this.unit * 100 + this.cent) * factor;
+		const unit = Math.floor(total / 100);
+		const cent = Math.round(total % 100);
+		return new Money(unit, cent);
+	}
+
+	div(divisor: number): Money {
+		if (divisor === 0) throw new Error("Division by zero");
+		const total = (this.unit * 100 + this.cent) / divisor;
+		const unit = Math.floor(total / 100);
+		const cent = Math.round(total % 100);
+		return new Money(unit, cent);
+	}
+
+	toString(): string {
+		const padded = this.cent.toString().padStart(2, "0");
+		return `${this.unit}.${padded}`;
 	}
 }
 

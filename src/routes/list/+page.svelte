@@ -4,15 +4,12 @@
 	import { type Product } from '$lib/types/product';
 	import ItemForm from '$lib/components/List/ItemForm.svelte';
 	import ListItem from '$lib/components/List/ListItem.svelte';
+	import { newProduct, getProduct, updateProduct, newList, newListItem, getList} from '$lib/db/dboperations';
 
 	let { listName = undefined } = $props();
 
 	let expand = $state(false);
-	let products = $state<Product[]>([
-		{id: 0, name: "Leche", price: new Money(10.50), quantity: 3},
-		{id: 1, name: "Chele", price: new Money(20, 50), quantity: 1},
-		{id: 2,name: "Jamon", price: new Money(30), quantity: 2},
-	]);
+	let products = $state<Product[]>([]);
 	let total: Money = $derived.by(() => {
 		let sum: Money = new Money(0, 0);
 		for (let p of products){
@@ -34,9 +31,41 @@
 		products = products.filter(p => p.id != pId);
 	}
 
+	async function saveList(){
+		//Create list
+		const listResult = await newList(listName);
+
+		if(!listResult || !listResult.lastId){
+			throw new Error("Failed to create list");
+		}
+		const l = await getList(listResult.lastId);
+		console.log("LOG list cuuuuum:", JSON.stringify(l, null, 2));
+		//Update products if exist if not new product
+		for (const product of products){
+			let productId;
+			const existingProduct = await getProduct(product.name);
+			if(existingProduct && existingProduct.length > 0){
+				console.log("here: ", JSON.stringify(existingProduct, null, 2));
+				if(existingProduct[0].price == product.price)
+					await updateProduct(existingProduct[0].product_id, product);
+				productId = existingProduct[0].product_id;
+			}else{
+				console.log("here2");
+				const productResult = await newProduct(product);
+				if(!productResult || !productResult.lastId){
+					throw new Error("Failed to create product");
+				}
+				productId = productResult.lastId;
+			}
+			//Add items to list
+			product.id = productId;
+			await newListItem(listResult.lastId, product);
+		}
+	}
+
 </script>
 
-<div class="flex flex-col min-h-screen bg-gray-100 p-4 text-center gap-4">
+<div class="flex flex-col min-h-screen bg-gray-100 p-4 text-center gap-4 pt-3">
 	<p class="text-3xl">Lista</p>
 		<div class="flex flex-col gap-3">
 			{#each products as _, i}
@@ -57,7 +86,7 @@
 			<p>{total}$</p>
 		</div>
 		<button
-			class="py-2 min-w-10 text-white bg-orange-400 rounded-xl hover:bg-orange-500 active:bg-orange-600 focus:outline-none text-2xl font-bold shadow-md"
+		onclick={saveList} class="py-2 min-w-10 text-white bg-orange-400 rounded-xl hover:bg-orange-500 active:bg-orange-600 focus:outline-none text-2xl font-bold shadow-md"
 		>Finalizar</button>
 	</div>
 </div>

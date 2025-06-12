@@ -27,7 +27,7 @@ export async function initDatabase(): Promise<SQLiteDBConnection> {
 
 											 CREATE TABLE IF NOT EXISTS products (
 												 product_id INTEGER PRIMARY KEY,
-												 name TEXT NOT NULL,
+												 product_name TEXT NOT NULL,
 												 price REAL NOT NULL CHECK (price >= 0)
 											 );
 

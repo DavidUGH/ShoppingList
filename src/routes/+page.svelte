@@ -4,30 +4,20 @@
 
 	import { onMount } from "svelte";
 	import { initDatabase, deleteDatabase } from "$lib/db/database";
-	import { newProduct, newListItem, listproducts } from "$lib/db/dboperations";
-
-	let products: any[] = [];
+	import { listproducts } from "$lib/db/dboperations";
 	
 	onMount(async () => {
-		await deleteDatabase();
 		await initDatabase();
-		await newProduct({id: 0, name: "A Drill", price: new Money(10.50), quantity: 1});
+		const ps = await listproducts();
+		console.log("LOG:", JSON.stringify(ps[0], null, 2));
 	});
-
-	async function loadProducts(){
-		products = await listproducts() ?? [];
-	}
-
 </script>
 
-<div>
-	<h1>Items from SQLite</h1>
-	<button onclick={loadProducts}>CUM</button>
-	{#if products.length > 0}
-		<ul>
-			{#each products as product}
-				<li>{JSON.stringify(product)}</li>
-			{/each}
-		</ul>
-	{/if}
+<div class="flex flex-col min-h-screen bg-gray-100 p-4 text-center gap-4">
+	<p class="text-3xl">Listas</p>
+	<a
+	 href="/list"
+	 class="py-4 min-w-10 text-white bg-orange-400 rounded-xl hover:bg-orange-500 active:bg-orange-600 focus:outline-none text-2xl shadow-md"
+	>
+	+</a>
 </div>
